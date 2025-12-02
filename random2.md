@@ -1,308 +1,1014 @@
-Ah! You want the **Markdown (.md) file** with all the code examples! Here it is:
+# Comprehensive Recursion Examples in C++
+
+**ECE 150 - Fundamentals of Programming**
 
 ---
 
-```markdown
-# Complete C++ Classes Code Examples
+## 📚 Table of Contents
 
-## Table of Contents
-1. [Rational Number Class](#rational-number-class)
-2. [Vector 3D Class](#vector-3d-class)
-3. [Array Class with Dynamic Memory](#array-class-with-dynamic-memory)
-4. [Simple Example Classes](#simple-example-classes)
-5. [Compilation Instructions](#compilation-instructions)
+1. [Introduction](#introduction)
+2. [Recursive Mathematical Functions](#recursive-mathematical-functions)
+   - [Factorial](#factorial)
+   - [Binomial Coefficients](#binomial-coefficients)
+   - [Fibonacci Numbers](#fibonacci-numbers)
+   - [Power Functions](#power-functions)
+3. [Sorting Algorithms](#sorting-algorithms)
+   - [Selection Sort](#selection-sort)
+   - [Insertion Sort](#insertion-sort)
+   - [Merge Sort](#merge-sort)
+4. [Binary Number Printing](#binary-number-printing)
+5. [Binary Search](#binary-search)
+6. [Subset Generation](#subset-generation)
+7. [Jumper Configuration Problem](#jumper-configuration-problem)
+8. [Complete Source Code](#complete-source-code)
+9. [How to Compile and Run](#how-to-compile-and-run)
 
 ---
 
-## Rational Number Class
+## Introduction
 
-### Rational.h
-```cpp
-#ifndef RATIONAL_H
-#define RATIONAL_H
+This document contains complete implementations of various recursive algorithms with detailed explanations and examples. Recursion is a powerful programming technique where a function calls itself to solve smaller instances of the same problem.
 
-#include <iostream>
-#include <stdexcept>
-#include <string>
+### Key Concepts of Recursion
 
-class Rational {
-public:
-    // Constructors
-    Rational();
-    Rational(int numer, int denom = 1);
-    
-    // Query functions (const)
-    int numer() const;
-    int denom() const;
-    Rational abs() const;
-    
-    // Arithmetic operators (member functions)
-    Rational operator+(Rational const &rhs) const;
-    Rational operator-(Rational const &rhs) const;
-    Rational operator-() const;  // Unary minus
-    Rational operator*(Rational const &rhs) const;
-    Rational operator/(Rational const &rhs) const;
-    
-    // Comparison operators
-    bool operator==(Rational const &rhs) const;
-    bool operator!=(Rational const &rhs) const;
-    bool operator<(Rational const &rhs) const;
-    bool operator<=(Rational const &rhs) const;
-    bool operator>(Rational const &rhs) const;
-    bool operator>=(Rational const &rhs) const;
-    
-    // Modifiers (non-const)
-    void numer(int new_numer);
-    void denom(int new_denom);
-    
-private:
-    int numer_;
-    int denom_;
-    
-    // Private helper functions
-    void normalize();
-    static int gcd(int a, int b);
-};
+Every recursive function must have:
+1. **Base Case**: The condition that stops recursion
+2. **Recursive Case**: The part where the function calls itself with a simpler problem
 
-// Non-member operators (for commutativity)
-Rational operator+(int lhs, Rational const &rhs);
-Rational operator-(int lhs, Rational const &rhs);
-Rational operator*(int lhs, Rational const &rhs);
-Rational operator/(int lhs, Rational const &rhs);
+---
 
-// Output operator
-std::ostream& operator<<(std::ostream &out, Rational const &r);
+## Recursive Mathematical Functions
 
-#endif
+### Factorial
+
+**Mathematical Definition:**
+```
+n! = 1                if n ≤ 1
+n! = n × (n-1)!       if n ≥ 2
 ```
 
-### Rational.cpp
+**Example:** `5! = 5 × 4 × 3 × 2 × 1 = 120`
+
+**How Recursion Works:**
+```
+factorial(5)
+  → 5 × factorial(4)
+  → 5 × 4 × factorial(3)
+  → 5 × 4 × 3 × factorial(2)
+  → 5 × 4 × 3 × 2 × factorial(1)
+  → 5 × 4 × 3 × 2 × 1
+  → 120
+```
+
+**Implementation:**
 ```cpp
-#include "Rational.h"
-#include <cmath>
-
-// Default constructor
-Rational::Rational():
-    numer_{0},
-    denom_{1} {
-}
-
-// Parameterized constructor
-Rational::Rational(int numer, int denom):
-    numer_{numer},
-    denom_{denom} {
-    
-    if (denom_ == 0) {
-        throw std::domain_error{"Denominator must be non-zero"};
+unsigned int factorial(unsigned int n) {
+    // BASE CASE: Stop recursion when n ≤ 1
+    if (n <= 1) {
+        return 1;
     }
     
-    normalize();
+    // RECURSIVE CASE: n! = n × (n-1)!
+    return n * factorial(n - 1);
 }
+```
 
-// Query: Get numerator
-int Rational::numer() const {
-    return numer_;
-}
+**Time Complexity:** O(n)  
+**Space Complexity:** O(n) due to call stack
 
-// Query: Get denominator
-int Rational::denom() const {
-    return denom_;
-}
+---
 
-// Query: Absolute value
-Rational Rational::abs() const {
-    return Rational{std::abs(numer_), denom_};
-}
+### Binomial Coefficients
 
-// Addition
-Rational Rational::operator+(Rational const &rhs) const {
-    int new_numer = numer_ * rhs.denom_ + rhs.numer_ * denom_;
-    int new_denom = denom_ * rhs.denom_;
-    return Rational{new_numer, new_denom};
-}
+**Also known as:** "n choose k" or C(n,k)
 
-// Subtraction
-Rational Rational::operator-(Rational const &rhs) const {
-    return *this + (-rhs);
-}
+**Represents:** Number of ways to choose k items from n items
 
-// Unary minus
-Rational Rational::operator-() const {
-    return Rational{-numer_, denom_};
-}
+**Mathematical Definition (Pascal's Triangle):**
+```
+C(n,k) = 0                        if k > n
+C(n,k) = 1                        if k = 0 or k = n
+C(n,k) = C(n-1,k) + C(n-1,k-1)    otherwise
+```
 
-// Multiplication
-Rational Rational::operator*(Rational const &rhs) const {
-    return Rational{numer_ * rhs.numer_, denom_ * rhs.denom_};
-}
+**Example:** `C(5,2) = 10` (there are 10 ways to choose 2 items from 5)
 
-// Division
-Rational Rational::operator/(Rational const &rhs) const {
-    if (rhs.numer_ == 0) {
-        throw std::domain_error{"Division by zero"};
-    }
-    return Rational{numer_ * rhs.denom_, denom_ * rhs.numer_};
-}
+**Pascal's Triangle:**
+```
+        1
+      1   1
+    1   2   1
+  1   3   3   1
+1   4   6   4   1
+```
+Each number is the sum of the two above it.
 
-// Equality
-bool Rational::operator==(Rational const &rhs) const {
-    return (numer_ == rhs.numer_) && (denom_ == rhs.denom_);
-}
-
-// Inequality
-bool Rational::operator!=(Rational const &rhs) const {
-    return !(*this == rhs);
-}
-
-// Less than
-bool Rational::operator<(Rational const &rhs) const {
-    return (numer_ * rhs.denom_) < (rhs.numer_ * denom_);
-}
-
-// Less than or equal
-bool Rational::operator<=(Rational const &rhs) const {
-    return (*this < rhs) || (*this == rhs);
-}
-
-// Greater than
-bool Rational::operator>(Rational const &rhs) const {
-    return !(*this <= rhs);
-}
-
-// Greater than or equal
-bool Rational::operator>=(Rational const &rhs) const {
-    return !(*this < rhs);
-}
-
-// Modifier: Set numerator
-void Rational::numer(int new_numer) {
-    numer_ = new_numer;
-    normalize();
-}
-
-// Modifier: Set denominator
-void Rational::denom(int new_denom) {
-    if (new_denom == 0) {
-        throw std::domain_error{"Denominator must be non-zero"};
-    }
-    denom_ = new_denom;
-    normalize();
-}
-
-// Private: Normalize to lowest terms
-void Rational::normalize() {
-    if (denom_ < 0) {
-        numer_ = -numer_;
-        denom_ = -denom_;
+**Implementation:**
+```cpp
+unsigned int binomial(unsigned int n, unsigned int k) {
+    // BASE CASE 1: Can't choose more items than we have
+    if (k > n) {
+        return 0;
     }
     
-    int g = gcd(std::abs(numer_), denom_);
-    numer_ /= g;
-    denom_ /= g;
-}
-
-// Static: Calculate GCD
-int Rational::gcd(int a, int b) {
-    while (b != 0) {
-        int temp = b;
-        b = a % b;
-        a = temp;
+    // BASE CASE 2: Choosing 0 or all items = 1 way
+    if ((k == 0) || (k == n)) {
+        return 1;
     }
-    return a;
+    
+    // RECURSIVE CASE: Use Pascal's identity
+    return binomial(n - 1, k) + binomial(n - 1, k - 1);
+}
+```
+
+**Time Complexity:** O(2^n) - exponential! Very slow for large n  
+**Space Complexity:** O(n)
+
+---
+
+### Fibonacci Numbers
+
+**Mathematical Definition:**
+```
+F(0) = 0
+F(1) = 1
+F(n) = F(n-1) + F(n-2)    for n ≥ 2
+```
+
+**Sequence:** 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144...
+
+#### Naive Recursive Implementation (⚠️ INEFFICIENT)
+
+```cpp
+unsigned int fibonacci_recursive(unsigned int n) {
+    // BASE CASES
+    if (n == 0) return 0;
+    if (n == 1) return 1;
+    
+    // RECURSIVE CASE
+    return fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2);
+}
+```
+
+**Problem with Naive Recursion:**
+
+This implementation recalculates the same values many times!
+
+```
+                    fib(5)
+                   /      \
+              fib(4)      fib(3)
+             /     \      /     \
+        fib(3)   fib(2) fib(2) fib(1)
+        /    \   /   \   /   \
+    fib(2) fib(1) ...  ...  ...
+```
+
+Notice `fib(3)` is calculated twice, `fib(2)` three times, etc.
+
+**Performance:** For F(47), this takes ~109 seconds!
+
+**Time Complexity:** O(2^n) - exponential!
+
+#### Iterative Implementation (✅ EFFICIENT)
+
+```cpp
+unsigned int fibonacci_iterative(unsigned int n) {
+    unsigned int values[2]{0, 1};
+    
+    // Build up from F(2) to F(n)
+    for (unsigned int k{2}; k <= n; ++k) {
+        values[k % 2] = values[0] + values[1];
+    }
+    
+    return values[n % 2];
+}
+```
+
+**Performance:** For F(47), this takes ~0.015 seconds!
+
+That's **over 7000 times faster!**
+
+**Time Complexity:** O(n) - linear  
+**Space Complexity:** O(1) - constant
+
+**Key Lesson:** Not all recursive solutions are efficient!
+
+---
+
+### Power Functions
+
+Calculate x^n for integer exponent n.
+
+#### Basic Recursive Implementation
+
+**Mathematical Definition:**
+```
+x^0 = 1
+x^(-n) = 1 / x^n
+x^n = x × x^(n-1)    for n > 0
+```
+
+**Example:** `2^5 = 2 × 2 × 2 × 2 × 2 = 32`
+
+```cpp
+double power_basic(double x, int n) {
+    // BASE CASE
+    if (n == 0) return 1.0;
+    
+    // Handle negative exponents
+    if (n < 0) return 1.0 / power_basic(x, -n);
+    
+    // RECURSIVE CASE: x^n = x × x^(n-1)
+    return x * power_basic(x, n - 1);
+}
+```
+
+**Time Complexity:** O(n) - makes n-1 recursive calls
+
+#### Optimized Recursive Implementation (Divide and Conquer)
+
+**Mathematical Definition:**
+```
+x^0 = 1
+x^(-n) = 1 / x^n
+x^n = (x^(n/2))^2       if n is even
+x^n = x × (x^(n/2))^2   if n is odd
+```
+
+**Example:** 
+```
+2^8 = (2^4)^2 = ((2^2)^2)^2 = (4^2)^2 = 16^2 = 256
+```
+
+Only 3 multiplications instead of 7!
+
+```cpp
+double power_optimized(double x, int n) {
+    // BASE CASE
+    if (n == 0) return 1.0;
+    
+    // Handle negative exponents
+    if (n < 0) return 1.0 / power_optimized(x, -n);
+    
+    // CRITICAL: Store result to avoid duplicate calculations!
+    double half_power = power_optimized(x, n / 2);
+    
+    // If n is even: x^n = (x^(n/2))^2
+    if ((n % 2) == 0) {
+        return half_power * half_power;
+    }
+    // If n is odd: x^n = x × (x^(n/2))^2
+    else {
+        return x * half_power * half_power;
+    }
+}
+```
+
+**Time Complexity:** O(log n) - much faster!  
+**Space Complexity:** O(log n)
+
+**Key Insight:** `2^8` needs only 3 multiplications instead of 7!
+
+---
+
+## Sorting Algorithms
+
+### Selection Sort
+
+**Strategy:**
+1. Find the largest element in the array
+2. Swap it with the last element
+3. Recursively sort the first n-1 elements
+
+**Example:**
+```
+[3, 1, 4, 2]
+Step 1: Find max (4), swap with last: [3, 1, 2, 4]
+Step 2: Sort [3, 1, 2]:
+        Find max (3), swap: [2, 1, 3] | 4
+Step 3: Sort [2, 1]:
+        Find max (2), swap: [1, 2] | 3, 4
+Step 4: Sort [1]: Already sorted!
+Result: [1, 2, 3, 4]
+```
+
+**Implementation:**
+```cpp
+void selection_sort(double array[], size_t capacity) {
+    // BASE CASE: Array of 0 or 1 elements is sorted
+    if (capacity <= 1) {
+        return;
+    }
+    
+    // Find maximum element
+    size_t max_index = find_max(array, capacity);
+    
+    // Swap max with last element
+    if (array[max_index] > array[capacity - 1]) {
+        swap(array[max_index], array[capacity - 1]);
+    }
+    
+    // RECURSIVE CASE: Sort first n-1 elements
+    selection_sort(array, capacity - 1);
+}
+```
+
+**Time Complexity:** O(n²)  
+**Space Complexity:** O(n) due to recursion stack
+
+---
+
+### Insertion Sort
+
+**Strategy:**
+1. Recursively sort the first n-1 elements
+2. Insert the last element into the sorted portion
+
+**Example:**
+```
+[3, 1, 4, 2]
+Step 1: Sort [3, 1, 4]:
+        Sort [3, 1]:
+          Sort [3]: Already sorted
+          Insert 1: [1, 3]
+        Insert 4: [1, 3, 4]
+Step 2: Insert 2: [1, 2, 3, 4]
+```
+
+**Implementation:**
+```cpp
+void insertion_sort(double array[], size_t capacity) {
+    // BASE CASE
+    if (capacity <= 1) {
+        return;
+    }
+    
+    // RECURSIVE CASE: Sort first n-1 elements
+    insertion_sort(array, capacity - 1);
+    
+    // Insert last element into sorted portion
+    insert(array, capacity);
+}
+```
+
+**Time Complexity:** O(n²)  
+**Space Complexity:** O(n)
+
+---
+
+### Merge Sort
+
+**Strategy (Divide and Conquer):**
+1. Divide array into two halves
+2. Recursively sort each half
+3. Merge the sorted halves
+
+**Example:**
+```
+[3, 1, 4, 2]
+
+Divide:  [3, 1] | [4, 2]
+
+Sort left:  [3, 1]
+  Divide:   [3] | [1]
+  Merge:    [1, 3]
+
+Sort right: [4, 2]
+  Divide:   [4] | [2]
+  Merge:    [2, 4]
+
+Merge: [1, 3] and [2, 4] → [1, 2, 3, 4]
+```
+
+**Implementation:**
+```cpp
+void merge_sort(double array[], size_t capacity) {
+    // BASE CASE
+    if (capacity <= 1) {
+        return;
+    }
+    
+    // Divide into two halves
+    size_t capacity_1 = capacity / 2;
+    size_t capacity_2 = capacity - capacity_1;
+    
+    // RECURSIVE CASE: Sort both halves
+    merge_sort(array, capacity_1);
+    merge_sort(array + capacity_1, capacity_2);
+    
+    // Merge sorted halves
+    merge(array, capacity_1, capacity_2);
+}
+```
+
+**Time Complexity:** O(n log n) - much better than O(n²)!  
+**Space Complexity:** O(n)
+
+This is one of the most efficient general-purpose sorting algorithms.
+
+---
+
+## Binary Number Printing
+
+**Goal:** Print the binary representation of an integer
+
+**Strategy:**
+- To print 13 in binary (which is 1101):
+  1. Last bit is `13 % 2 = 1`
+  2. Before printing that, print `13/2 = 6` in binary
+  3. Continue recursively until we reach 0 or 1
+
+**Example Trace for 13:**
+```
+print_binary(13)
+  print_binary(6)
+    print_binary(3)
+      print_binary(1)  → prints "1"
+      prints 3%2 = 1
+    prints 6%2 = 0
+  prints 13%2 = 1
+Result: "1101"
+```
+
+**Implementation:**
+```cpp
+void print_binary(int const n) {
+    // Handle negative numbers
+    if (n < 0) {
+        cout << "-";
+        print_binary(-n);
+        return;
+    }
+    
+    // BASE CASE: Single bit
+    if ((n == 0) || (n == 1)) {
+        cout << n;
+        return;
+    }
+    
+    // RECURSIVE CASE
+    print_binary(n / 2);    // Print all bits except last
+    cout << (n % 2);        // Print last bit
+}
+```
+
+**Examples:**
+- `print_binary(5)` → "101"
+- `print_binary(13)` → "1101"
+- `print_binary(-5)` → "-101"
+
+---
+
+## Binary Search
+
+**Goal:** Search for a value in a SORTED array (much faster than linear search!)
+
+**Strategy:**
+1. Check middle element
+2. If it matches, return its index
+3. If value < middle, search left half
+4. If value > middle, search right half
+
+**Example:** Search for 7 in `[1, 4, 7, 12, 21, 30, 34, 48, 50, 56]`
+```
+                                      ↑
+Step 1: Middle is 21 (index 4)
+        7 < 21, search left: [1, 4, 7, 12]
+                                  ↑
+Step 2: Middle is 4 (index 1)
+        7 > 4, search right: [7, 12]
+                              ↑
+Step 3: Middle is 7 (index 0)
+        7 == 7, found at index 2!
+```
+
+**Implementation:**
+```cpp
+size_t binary_search(double array[], size_t capacity, double value) {
+    // BASE CASE: Small array
+    if (capacity <= 2) {
+        for (size_t k = 0; k < capacity; k++) {
+            if (array[k] == value) return k;
+        }
+        return capacity;  // Not found
+    }
+    
+    size_t middle_index = capacity / 2;
+    
+    // Check middle element
+    if (array[middle_index] == value) {
+        return middle_index;
+    }
+    // Search left half
+    else if (value < array[middle_index]) {
+        size_t result = binary_search(array, middle_index, value);
+        if (result == middle_index) return capacity;
+        return result;
+    }
+    // Search right half
+    else {
+        return binary_search(array + middle_index + 1,
+                           capacity - middle_index - 1,
+                           value) + middle_index + 1;
+    }
+}
+```
+
+**Time Complexity:** O(log n) - very fast!  
+For 1 million elements, needs at most 20 comparisons.
+
+---
+
+## Subset Generation
+
+**Goal:** Print all subsets of {1, 2, 3, ..., n}
+
+**Strategy (Decision Tree):**
+- For each element, make 2 choices: include it or exclude it
+- This creates a binary tree of decisions
+
+**Example for {1, 2, 3}:**
+```
+                        {}
+                    /        \
+              include 1      exclude 1
+                {1}             {}
+              /    \          /    \
+            {1,2}  {1}      {2}    {}
+           /   \   /  \    /  \   /  \
+       {1,2,3}{1,2}{1,3}{1}{2,3}{2}{3}{}
+```
+
+**Output:**
+```
+(empty set)
+1
+2
+3
+1 2
+1 3
+2 3
+1 2 3
+```
+
+This generates 2^n subsets (8 for n=3).
+
+**Implementation:**
+```cpp
+void print_subsets_helper(bool membership_array[], size_t capacity,
+                          size_t current_index) {
+    // BASE CASE: Decided for all elements
+    if (current_index == capacity) {
+        // Print this subset
+        for (size_t k = 0; k < capacity; k++) {
+            if (membership_array[k]) {
+                cout << (k + 1) << " ";
+            }
+        }
+        cout << endl;
+        return;
+    }
+    
+    // RECURSIVE CASE 1: Include current element
+    membership_array[current_index] = true;
+    print_subsets_helper(membership_array, capacity, current_index + 1);
+    
+    // RECURSIVE CASE 2: Exclude current element
+    membership_array[current_index] = false;
+    print_subsets_helper(membership_array, capacity, current_index + 1);
 }
 
-// Non-member operators
-Rational operator+(int lhs, Rational const &rhs) {
-    return Rational{lhs} + rhs;
+void print_subsets(unsigned int n) {
+    bool* membership_array = new bool[n]();
+    print_subsets_helper(membership_array, n, 0);
+    delete[] membership_array;
+}
+```
+
+**Time Complexity:** O(2^n)  
+**Space Complexity:** O(n)
+
+---
+
+## Jumper Configuration Problem
+
+**Problem:** Print all valid configurations of jumper pins
+
+A jumper configuration string contains:
+- `'0'` = open (not connected)
+- `'1'` = closed (connected)
+- `'?'` = user configurable (can be 0 or 1)
+
+**Example:** `"1?0?1"` has 4 possible configurations:
+```
+10001
+10011
+11001
+11011
+```
+
+**Implementation:**
+```cpp
+void print_configurations(char pins[]) {
+    // Find first '?' character
+    size_t len = strlen(pins);
+    size_t question_pos = len;
+    
+    for (size_t i = 0; i < len; i++) {
+        if (pins[i] == '?') {
+            question_pos = i;
+            break;
+        }
+    }
+    
+    // BASE CASE: No more '?' characters
+    if (question_pos == len) {
+        cout << pins << endl;
+        return;
+    }
+    
+    // RECURSIVE CASE 1: Replace '?' with '0'
+    pins[question_pos] = '0';
+    print_configurations(pins);
+    
+    // RECURSIVE CASE 2: Replace '?' with '1'
+    pins[question_pos] = '1';
+    print_configurations(pins);
+    
+    // Restore '?' for backtracking
+    pins[question_pos] = '?';
+}
+```
+
+---
+
+## Complete Source Code
+
+```cpp
+/*
+ * COMPREHENSIVE RECURSION EXAMPLES
+ * ECE 150 - Fundamentals of Programming
+ * 
+ * This file contains implementations of various recursive algorithms
+ * with detailed explanations and examples.
+ */
+
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+
+using namespace std;
+
+// ============================================================================
+// SECTION 1: RECURSIVE MATHEMATICAL FUNCTIONS
+// ============================================================================
+
+unsigned int factorial(unsigned int n) {
+    if (n <= 1) {
+        return 1;
+    }
+    return n * factorial(n - 1);
 }
 
-Rational operator-(int lhs, Rational const &rhs) {
-    return Rational{lhs} - rhs;
+unsigned int binomial(unsigned int n, unsigned int k) {
+    if (k > n) {
+        return 0;
+    }
+    if ((k == 0) || (k == n)) {
+        return 1;
+    }
+    return binomial(n - 1, k) + binomial(n - 1, k - 1);
 }
 
-Rational operator*(int lhs, Rational const &rhs) {
-    return Rational{lhs} * rhs;
+unsigned int fibonacci_recursive(unsigned int n) {
+    if (n == 0) return 0;
+    if (n == 1) return 1;
+    return fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2);
 }
 
-Rational operator/(int lhs, Rational const &rhs) {
-    return Rational{lhs} / rhs;
+unsigned int fibonacci_iterative(unsigned int n) {
+    unsigned int values[2]{0, 1};
+    for (unsigned int k{2}; k <= n; ++k) {
+        values[k % 2] = values[0] + values[1];
+    }
+    return values[n % 2];
 }
 
-// Output operator
-std::ostream& operator<<(std::ostream &out, Rational const &r) {
-    if (r.denom() == 1) {
-        out << r.numer();
+double power_basic(double x, int n) {
+    if (n == 0) return 1.0;
+    if (n < 0) return 1.0 / power_basic(x, -n);
+    return x * power_basic(x, n - 1);
+}
+
+double power_optimized(double x, int n) {
+    if (n == 0) return 1.0;
+    if (n < 0) return 1.0 / power_optimized(x, -n);
+    
+    double half_power = power_optimized(x, n / 2);
+    
+    if ((n % 2) == 0) {
+        return half_power * half_power;
     } else {
-        out << r.numer() << "/" << r.denom();
+        return x * half_power * half_power;
     }
-    return out;
 }
-```
 
-### main_rational.cpp
-```cpp
-#include "Rational.h"
-#include <iostream>
+// ============================================================================
+// SECTION 2: HELPER FUNCTIONS FOR SORTING
+// ============================================================================
+
+size_t find_max(double array[], size_t capacity) {
+    if (capacity == 0) return 0;
+    size_t max_index = 0;
+    for (size_t i = 1; i < capacity; i++) {
+        if (array[i] > array[max_index]) {
+            max_index = i;
+        }
+    }
+    return max_index;
+}
+
+void insert(double array[], size_t capacity) {
+    if (capacity <= 1) return;
+    double last = array[capacity - 1];
+    size_t i = capacity - 2;
+    while (i < capacity && array[i] > last) {
+        array[i + 1] = array[i];
+        i--;
+    }
+    array[i + 1] = last;
+}
+
+bool is_sorted(double array[], size_t capacity) {
+    for (size_t i = 1; i < capacity; i++) {
+        if (array[i] < array[i - 1]) return false;
+    }
+    return true;
+}
+
+void print_array(double array[], size_t capacity) {
+    cout << "[";
+    for (size_t i = 0; i < capacity; i++) {
+        cout << array[i];
+        if (i < capacity - 1) cout << ", ";
+    }
+    cout << "]" << endl;
+}
+
+// ============================================================================
+// SECTION 3: RECURSIVE SORTING ALGORITHMS
+// ============================================================================
+
+void selection_sort(double array[], size_t capacity) {
+    if (capacity <= 1) {
+        return;
+    }
+    size_t max_index = find_max(array, capacity);
+    if (array[max_index] > array[capacity - 1]) {
+        swap(array[max_index], array[capacity - 1]);
+    }
+    selection_sort(array, capacity - 1);
+}
+
+void insertion_sort(double array[], size_t capacity) {
+    if (capacity <= 1) {
+        return;
+    }
+    insertion_sort(array, capacity - 1);
+    insert(array, capacity);
+}
+
+void merge(double array[], size_t cap_1, size_t cap_2) {
+    double* tmp_array = new double[cap_1 + cap_2];
+    size_t k1 = 0, k2 = cap_1, j = 0;
+    
+    while ((k1 < cap_1) && (k2 < cap_1 + cap_2)) {
+        if (array[k1] <= array[k2]) {
+            tmp_array[j] = array[k1];
+            k1++;
+        } else {
+            tmp_array[j] = array[k2];
+            k2++;
+        }
+        j++;
+    }
+    
+    while (k1 < cap_1) {
+        tmp_array[j] = array[k1];
+        k1++; j++;
+    }
+    
+    while (k2 < cap_1 + cap_2) {
+        tmp_array[j] = array[k2];
+        k2++; j++;
+    }
+    
+    for (size_t k = 0; k < (cap_1 + cap_2); k++) {
+        array[k] = tmp_array[k];
+    }
+    
+    delete[] tmp_array;
+}
+
+void merge_sort(double array[], size_t capacity) {
+    if (capacity <= 1) {
+        return;
+    }
+    size_t capacity_1 = capacity / 2;
+    size_t capacity_2 = capacity - capacity_1;
+    merge_sort(array, capacity_1);
+    merge_sort(array + capacity_1, capacity_2);
+    merge(array, capacity_1, capacity_2);
+}
+
+// ============================================================================
+// SECTION 4: BINARY NUMBER PRINTING
+// ============================================================================
+
+void print_binary(int const n) {
+    if (n < 0) {
+        cout << "-";
+        print_binary(-n);
+        return;
+    }
+    if ((n == 0) || (n == 1)) {
+        cout << n;
+        return;
+    }
+    print_binary(n / 2);
+    cout << (n % 2);
+}
+
+// ============================================================================
+// SECTION 5: BINARY SEARCH
+// ============================================================================
+
+size_t binary_search(double array[], size_t capacity, double value) {
+    if (capacity <= 2) {
+        for (size_t k = 0; k < capacity; k++) {
+            if (array[k] == value) return k;
+        }
+        return capacity;
+    }
+    
+    size_t middle_index = capacity / 2;
+    
+    if (array[middle_index] == value) {
+        return middle_index;
+    } else if (value < array[middle_index]) {
+        size_t result = binary_search(array, middle_index, value);
+        if (result == middle_index) return capacity;
+        return result;
+    } else {
+        return binary_search(array + middle_index + 1,
+                           capacity - middle_index - 1,
+                           value) + middle_index + 1;
+    }
+}
+
+// ============================================================================
+// SECTION 6: SUBSET GENERATION
+// ============================================================================
+
+void print_subsets_helper(bool membership_array[], size_t capacity,
+                          size_t current_index) {
+    if (current_index == capacity) {
+        for (size_t k = 0; k < capacity; k++) {
+            if (membership_array[k]) {
+                cout << (k + 1) << " ";
+            }
+        }
+        cout << endl;
+        return;
+    }
+    
+    membership_array[current_index] = true;
+    print_subsets_helper(membership_array, capacity, current_index + 1);
+    
+    membership_array[current_index] = false;
+    print_subsets_helper(membership_array, capacity, current_index + 1);
+}
+
+void print_subsets(unsigned int n) {
+    bool* membership_array = new bool[n]();
+    print_subsets_helper(membership_array, n, 0);
+    delete[] membership_array;
+}
+
+void print_configurations(char pins[]) {
+    size_t len = strlen(pins);
+    size_t question_pos = len;
+    
+    for (size_t i = 0; i < len; i++) {
+        if (pins[i] == '?') {
+            question_pos = i;
+            break;
+        }
+    }
+    
+    if (question_pos == len) {
+        cout << pins << endl;
+        return;
+    }
+    
+    pins[question_pos] = '0';
+    print_configurations(pins);
+    
+    pins[question_pos] = '1';
+    print_configurations(pins);
+    
+    pins[question_pos] = '?';
+}
+
+// ============================================================================
+// SECTION 7: TESTING FUNCTIONS
+// ============================================================================
+
+void test_factorial() {
+    cout << "\n========== TESTING FACTORIAL ==========\n";
+    cout << "5! = " << factorial(5) << " (expected: 120)" << endl;
+}
+
+void test_fibonacci() {
+    cout << "\n========== TESTING FIBONACCI ==========\n";
+    cout << "First 10 Fibonacci numbers:" << endl;
+    for (int i = 0; i <= 9; i++) {
+        cout << "F(" << i << ") = " << fibonacci_iterative(i) << endl;
+    }
+}
+
+void test_sorting() {
+    cout << "\n========== TESTING SORTING ==========\n";
+    double arr[] = {3.5, 1.2, 4.8, 2.1, 5.3};
+    size_t size = 5;
+    
+    cout << "Original: ";
+    print_array(arr, size);
+    
+    merge_sort(arr, size);
+    cout << "Sorted:   ";
+    print_array(arr, size);
+}
+
+void test_binary_print() {
+    cout << "\n========== TESTING BINARY PRINTING ==========\n";
+    for (int i = 0; i <= 10; i++) {
+        cout << i << " = ";
+        print_binary(i);
+        cout << endl;
+    }
+}
+
+void test_subsets() {
+    cout << "\n========== TESTING SUBSETS ==========\n";
+    cout << "All subsets of {1, 2, 3}:" << endl;
+    print_subsets(3);
+}
+
+// ============================================================================
+// MAIN FUNCTION
+// ============================================================================
 
 int main() {
-    std::cout << "=== Rational Number Class Demo ===\n\n";
+    cout << "====================================================\n";
+    cout << "   COMPREHENSIVE RECURSION DEMONSTRATIONS\n";
+    cout << "====================================================\n";
     
-    try {
-        // Constructors
-        std::cout << "1. Constructors:\n";
-        Rational r1;
-        Rational r2{3, 4};
-        Rational r3{6, 8};  // Normalized to 3/4
-        Rational r4{5};
+    while (true) {
+        cout << "\n\nSelect a demonstration:\n";
+        cout << "1. Factorial\n";
+        cout << "2. Fibonacci\n";
+        cout << "3. Sorting\n";
+        cout << "4. Binary Printing\n";
+        cout << "5. Subsets\n";
+        cout << "0. Run ALL tests\n";
+        cout << "Q. Quit\n";
+        cout << "\nEnter choice: ";
         
-        std::cout << "r1 = " << r1 << " (default)\n";
-        std::cout << "r2 = " << r2 << "\n";
-        std::cout << "r3 = " << r3 << " (normalized from 6/8)\n";
-        std::cout << "r4 = " << r4 << "\n\n";
+        char choice;
+        cin >> choice;
         
-        // Arithmetic
-        std::cout << "2. Arithmetic:\n";
-        Rational a{1, 2};
-        Rational b{1, 3};
-        
-        std::cout << a << " + " << b << " = " << (a + b) << "\n";
-        std::cout << a << " - " << b << " = " << (a - b) << "\n";
-        std::cout << a << " * " << b << " = " << (a * b) << "\n";
-        std::cout << a << " / " << b << " = " << (a / b) << "\n";
-        std::cout << "-(" << a << ") = " << (-a) << "\n\n";
-        
-        // Comparisons
-        std::cout << "3. Comparisons:\n";
-        std::cout << a << " == " << b << " : " << (a == b) << "\n";
-        std::cout << a << " != " << b << " : " << (a != b) << "\n";
-        std::cout << a << " < " << b << " : " << (a < b) << "\n";
-        std::cout << a << " > " << b << " : " << (a > b) << "\n\n";
-        
-        // Mixed operations
-        std::cout << "4. Mixed with integers:\n";
-        std::cout << a << " + 2 = " << (a + 2) << "\n";
-        std::cout << "2 + " << a << " = " << (2 + a) << "\n";
-        std::cout << a << " * 3 = " << (a * 3) << "\n";
-        std::cout << "3 * " << a << " = " << (3 * a) << "\n\n";
-        
-        // Exception handling
-        std::cout << "5. Exception handling:\n";
-        try {
-            Rational bad{1, 0};
-        } catch (std::domain_error const &e) {
-            std::cout << "Caught: " << e.what() << "\n";
+        switch (choice) {
+            case '1': test_factorial(); break;
+            case '2': test_fibonacci(); break;
+            case '3': test_sorting(); break;
+            case '4': test_binary_print(); break;
+            case '5': test_subsets(); break;
+            case '0':
+                test_factorial();
+                test_fibonacci();
+                test_sorting();
+                test_binary_print();
+                test_subsets();
+                break;
+            case 'Q':
+            case 'q':
+                cout << "\nThank you!\n";
+                return 0;
+            default:
+                cout << "\nInvalid choice.\n";
         }
-        
-        try {
-            Rational zero{0};
-            Rational result = a / zero;
-        } catch (std::domain_error const &e) {
-            std::cout << "Caught: " << e.what() << "\n";
-        }
-        
-    } catch (std::exception const &e) {
-        std::cerr << "Error: " << e.what() << "\n";
-        return 1;
     }
     
     return 0;
@@ -311,741 +1017,60 @@ int main() {
 
 ---
 
-## Vector 3D Class
+## How to Compile and Run
 
-### Vector_3d.h
-```cpp
-#ifndef VECTOR_3D_H
-#define VECTOR_3D_H
-
-#include <cmath>
-
-class Vector_3d {
-public:
-    // Constructors
-    Vector_3d(double x = 0.0, double y = 0.0, double z = 0.0);
-    
-    // Accessors (const)
-    double x() const;
-    double y() const;
-    double z() const;
-    
-    // Mutators
-    void x(double new_x);
-    void y(double new_y);
-    void z(double new_z);
-    
-    // Vector operations (const)
-    double norm() const;
-    double inner_product(Vector_3d const &other) const;
-    Vector_3d cross(Vector_3d const &other) const;
-    
-    // Modifiers
-    void normalize();
-    
-    // Operators
-    Vector_3d operator+(Vector_3d const &rhs) const;
-    Vector_3d operator-(Vector_3d const &rhs) const;
-    Vector_3d operator*(double scalar) const;
-    
-private:
-    double x_;
-    double y_;
-    double z_;
-};
-
-// Non-member operator
-Vector_3d operator*(double scalar, Vector_3d const &v);
-
-#endif
-```
-
-### Vector_3d.cpp
-```cpp
-#include "Vector_3d.h"
-
-// Constructor
-Vector_3d::Vector_3d(double x, double y, double z):
-    x_{x},
-    y_{y},
-    z_{z} {
-}
-
-// Accessors
-double Vector_3d::x() const {
-    return x_;
-}
-
-double Vector_3d::y() const {
-    return y_;
-}
-
-double Vector_3d::z() const {
-    return z_;
-}
-
-// Mutators
-void Vector_3d::x(double new_x) {
-    x_ = new_x;
-}
-
-void Vector_3d::y(double new_y) {
-    y_ = new_y;
-}
-
-void Vector_3d::z(double new_z) {
-    z_ = new_z;
-}
-
-// Norm (magnitude)
-double Vector_3d::norm() const {
-    return std::sqrt(x_*x_ + y_*y_ + z_*z_);
-}
-
-// Inner product (dot product)
-double Vector_3d::inner_product(Vector_3d const &other) const {
-    return x_*other.x_ + y_*other.y_ + z_*other.z_;
-}
-
-// Cross product
-Vector_3d Vector_3d::cross(Vector_3d const &other) const {
-    return Vector_3d{
-        y_*other.z_ - z_*other.y_,
-        z_*other.x_ - x_*other.z_,
-        x_*other.y_ - y_*other.x_
-    };
-}
-
-// Normalize (convert to unit vector)
-void Vector_3d::normalize() {
-    double n = norm();
-    if (n != 0.0) {
-        x_ /= n;
-        y_ /= n;
-        z_ /= n;
-    }
-}
-
-// Vector addition
-Vector_3d Vector_3d::operator+(Vector_3d const &rhs) const {
-    return Vector_3d{x_ + rhs.x_, y_ + rhs.y_, z_ + rhs.z_};
-}
-
-// Vector subtraction
-Vector_3d Vector_3d::operator-(Vector_3d const &rhs) const {
-    return Vector_3d{x_ - rhs.x_, y_ - rhs.y_, z_ - rhs.z_};
-}
-
-// Scalar multiplication
-Vector_3d Vector_3d::operator*(double scalar) const {
-    return Vector_3d{x_*scalar, y_*scalar, z_*scalar};
-}
-
-// Non-member scalar multiplication
-Vector_3d operator*(double scalar, Vector_3d const &v) {
-    return v * scalar;
-}
-```
-
----
-
-## Array Class with Dynamic Memory
-
-### Array.h
-```cpp
-#ifndef ARRAY_H
-#define ARRAY_H
-
-#include <cstddef>
-#include <stdexcept>
-
-class Array {
-public:
-    // Constructor
-    Array(std::size_t capacity, double value = 0.0);
-    
-    // Destructor
-    ~Array();
-    
-    // Copy constructor
-    Array(Array const &original);
-    
-    // Copy assignment operator
-    Array& operator=(Array const &rhs);
-    
-    // Move constructor (C++11)
-    Array(Array &&original);
-    
-    // Move assignment operator (C++11)
-    Array& operator=(Array &&rhs);
-    
-    // Accessors
-    std::size_t capacity() const;
-    
-    // Indexing (no bounds checking)
-    double operator[](std::size_t k) const;
-    double& operator[](std::size_t k);
-    
-    // At (with bounds checking)
-    double at(std::size_t k) const;
-    double& at(std::size_t k);
-    
-private:
-    std::size_t capacity_;
-    double *array_;
-};
-
-#endif
-```
-
-### Array.cpp
-```cpp
-#include "Array.h"
-#include <utility>  // For std::swap
-#include <string>
-
-// Constructor
-Array::Array(std::size_t capacity, double value):
-    capacity_{capacity},
-    array_{new double[capacity_]} {
-    
-    for (std::size_t k = 0; k < capacity_; ++k) {
-        array_[k] = value;
-    }
-}
-
-// Destructor
-Array::~Array() {
-    delete[] array_;
-    array_ = nullptr;
-    capacity_ = 0;
-}
-
-// Copy constructor (deep copy)
-Array::Array(Array const &original):
-    capacity_{original.capacity_},
-    array_{new double[capacity_]} {
-    
-    for (std::size_t k = 0; k < capacity_; ++k) {
-        array_[k] = original.array_[k];
-    }
-}
-
-// Copy assignment operator
-Array& Array::operator=(Array const &rhs) {
-    if (this != &rhs) {
-        // Copy-and-swap idiom
-        Array copy{rhs};
-        std::swap(capacity_, copy.capacity_);
-        std::swap(array_, copy.array_);
-    }
-    return *this;
-}
-
-// Move constructor
-Array::Array(Array &&original):
-    capacity_{original.capacity_},
-    array_{original.array_} {
-    
-    // Leave original in valid state
-    original.capacity_ = 0;
-    original.array_ = nullptr;
-}
-
-// Move assignment operator
-Array& Array::operator=(Array &&rhs) {
-    if (this != &rhs) {
-        delete[] array_;
-        
-        capacity_ = rhs.capacity_;
-        array_ = rhs.array_;
-        
-        rhs.capacity_ = 0;
-        rhs.array_ = nullptr;
-    }
-    return *this;
-}
-
-// Get capacity
-std::size_t Array::capacity() const {
-    return capacity_;
-}
-
-// Indexing operator (const version)
-double Array::operator[](std::size_t k) const {
-    return array_[k];
-}
-
-// Indexing operator (non-const version)
-double& Array::operator[](std::size_t k) {
-    return array_[k];
-}
-
-// At with bounds checking (const version)
-double Array::at(std::size_t k) const {
-    if (k >= capacity_) {
-        throw std::out_of_range{
-            "Index " + std::to_string(k) + 
-            " out of range [0, " + std::to_string(capacity_-1) + "]"
-        };
-    }
-    return array_[k];
-}
-
-// At with bounds checking (non-const version)
-double& Array::at(std::size_t k) {
-    if (k >= capacity_) {
-        throw std::out_of_range{
-            "Index " + std::to_string(k) + 
-            " out of range [0, " + std::to_string(capacity_-1) + "]"
-        };
-    }
-    return array_[k];
-}
-```
-
-### main_array.cpp
-```cpp
-#include "Array.h"
-#include <iostream>
-
-int main() {
-    std::cout << "=== Array Class Demo ===\n\n";
-    
-    try {
-        // Constructor
-        std::cout << "1. Creating array of size 10:\n";
-        Array data{10, 3.14};
-        std::cout << "Capacity: " << data.capacity() << "\n\n";
-        
-        // Indexing
-        std::cout << "2. Setting values:\n";
-        for (std::size_t k = 0; k < 10; ++k) {
-            data[k] = k * k;
-        }
-        
-        std::cout << "3. Reading values:\n";
-        for (std::size_t k = 0; k < 10; ++k) {
-            std::cout << "data[" << k << "] = " << data[k] << "\n";
-        }
-        std::cout << "\n";
-        
-        // Copy constructor
-        std::cout << "4. Copy constructor:\n";
-        Array copy{data};
-        std::cout << "copy capacity: " << copy.capacity() << "\n";
-        std::cout << "copy[0] = " << copy[0] << "\n\n";
-        
-        // Assignment
-        std::cout << "5. Assignment operator:\n";
-        Array another{5};
-        another = data;
-        std::cout << "another capacity: " << another.capacity() << "\n";
-        std::cout << "another[0] = " << another[0] << "\n\n";
-        
-        // Bounds checking with at()
-        std::cout << "6. Bounds checking:\n";
-        std::cout << "data.at(5) = " << data.at(5) << "\n";
-        
-        try {
-            std::cout << "Trying data.at(100)...\n";
-            data.at(100);
-        } catch (std::out_of_range const &e) {
-            std::cout << "Caught: " << e.what() << "\n";
-        }
-        
-    } catch (std::exception const &e) {
-        std::cerr << "Error: " << e.what() << "\n";
-        return 1;
-    }
-    
-    return 0;
-}
-```
-
----
-
-## Simple Example Classes
-
-### Body.h (3-Body Simulation)
-```cpp
-#ifndef BODY_H
-#define BODY_H
-
-class Body {
-public:
-    double position_[3];
-    double velocity_[3];
-    double mass_;
-};
-
-#endif
-```
-
-### Pair.h
-```cpp
-#ifndef PAIR_H
-#define PAIR_H
-
-#include <iostream>
-
-class Pair {
-public:
-    Pair(int first, int second);
-    
-    // Friend function for output
-    friend std::ostream& operator<<(std::ostream &out, Pair const &p);
-    
-private:
-    int first_;
-    int second_;
-};
-
-#endif
-```
-
-### Pair.cpp
-```cpp
-#include "Pair.h"
-
-Pair::Pair(int first, int second):
-    first_{first},
-    second_{second} {
-}
-
-std::ostream& operator<<(std::ostream &out, Pair const &p) {
-    out << "(" << p.first_ << "," << p.second_ << ")";
-    return out;
-}
-```
-
----
-
-## Demo Classes from Slides
-
-### Class C (Multiple Constructors)
-```cpp
-#include <iostream>
-#include <string>
-
-class C {
-public:
-    C(double x = 0.0);
-    C(int m, int n = 0);
-    std::string about() const;
-};
-
-C::C(double x) {
-    std::cout << "Calling C(double)" << std::endl;
-}
-
-C::C(int m, int n) {
-    std::cout << "Calling C(int, int)" << std::endl;
-}
-
-std::string C::about() const {
-    return "Harmless";
-}
-
-int main() {
-    C data[10]{ {1}, {}, {5, 7}, {2.5} };
-    
-    for (std::size_t k = 0; k < 10; ++k) {
-        std::cout << data[k].about() << std::endl;
-    }
-    
-    return 0;
-}
-```
-
-### Class G (With Value Retrieval)
-```cpp
-#include <iostream>
-
-class G {
-public:
-    G(int n);
-    G(G const &original);
-    ~G();
-    int retrieve() const;
-    
-private:
-    int value_;
-};
-
-G::G(int new_value):
-    value_{new_value} {
-    std::cout << "Calling G(int)" << std::endl;
-}
-
-G::G(G const &original):
-    value_{original.value_} {
-    std::cout << "Calling G(G const &)" << std::endl;
-}
-
-G::~G() {
-    std::cout << "Calling ~G()" << std::endl;
-}
-
-int G::retrieve() const {
-    return value_;
-}
-
-int main() {
-    // Single object
-    G *p_item{ new G{3} };
-    delete p_item;
-    p_item = nullptr;
-    
-    // Array of objects
-    G *a_items{ new G[3]{ {101}, {102}, {103} } };
-    
-    for (std::size_t k = 0; k < 3; ++k) {
-        std::cout << a_items[k].retrieve() << std::endl;
-    }
-    
-    delete[] a_items;
-    a_items = nullptr;
-    
-    return 0;
-}
-```
-
-### Node Class (Linked List)
-```cpp
-#include <iostream>
-
-class Node {
-public:
-    int value_;
-    Node *p_next_;
-};
-
-int main() {
-    Node *p_42{ new Node{42, nullptr} };
-    std::cout << "p_42 == " << p_42 << std::endl;
-    
-    Node *p_91{ new Node{91, p_42} };
-    std::cout << "p_91 == " << p_91 << std::endl;
-    
-    std::cout << p_91->value_ << std::endl;
-    std::cout << p_91->p_next_ << std::endl;
-    std::cout << p_91->p_next_->value_ << std::endl;
-    std::cout << p_91->p_next_->p_next_ << std::endl;
-    
-    delete p_91->p_next_;
-    p_91->p_next_ = nullptr;
-    
-    p_42 = nullptr;  // Now dangling
-    
-    delete p_91;
-    p_91 = nullptr;
-    
-    return 0;
-}
-```
-
----
-
-## Compilation Instructions
-
-### For Rational Class
+### Compilation
 ```bash
-# Compile separately
-g++ -std=c++17 -c Rational.cpp -o Rational.o
-g++ -std=c++17 -c main_rational.cpp -o main_rational.o
-g++ Rational.o main_rational.o -o rational_demo
-
-# Or compile all at once
-g++ -std=c++17 -Wall -Wextra main_rational.cpp Rational.cpp -o rational_demo
-
-# Run
-./rational_demo
+g++ recursion_comprehensive.cpp -o recursion
 ```
 
-### For Array Class
+### Execution
 ```bash
-g++ -std=c++17 -Wall -Wextra main_array.cpp Array.cpp -o array_demo
-./array_demo
+./recursion
 ```
 
-### For Vector_3d Class
-```bash
-g++ -std=c++17 -Wall -Wextra main_vector.cpp Vector_3d.cpp -o vector_demo
-./vector_demo
-```
+### Features
+- ✅ Interactive menu to run individual demonstrations
+- ✅ Option to run all tests at once
+- ✅ Detailed comments explaining each algorithm
+- ✅ Examples showing time complexity differences
 
-### For Simple Examples
-```bash
-# Single file examples
-g++ -std=c++17 -Wall -Wextra example_class_c.cpp -o demo_c
-./demo_c
-
-g++ -std=c++17 -Wall -Wextra example_class_g.cpp -o demo_g
-./demo_g
-
-g++ -std=c++17 -Wall -Wextra example_node.cpp -o demo_node
-./demo_node
-```
+### Key Learning Points
+1. **Understanding base cases and recursive cases** - Every recursive function needs both
+2. **Recognizing efficiency** - Naive Fibonacci is 7000x slower than iterative!
+3. **Divide and conquer** - Power function optimization reduces O(n) to O(log n)
+4. **When to use recursion** - Some problems (merge sort, tree traversal) are naturally recursive
+5. **Space complexity** - Recursion uses stack space (can cause stack overflow)
 
 ---
 
-## Makefile (Optional)
+## Summary of Time Complexities
 
-```makefile
-CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra
-
-all: rational_demo array_demo vector_demo
-
-rational_demo: main_rational.o Rational.o
-	$(CXX) $(CXXFLAGS) -o rational_demo main_rational.o Rational.o
-
-array_demo: main_array.o Array.o
-	$(CXX) $(CXXFLAGS) -o array_demo main_array.o Array.o
-
-vector_demo: main_vector.o Vector_3d.o
-	$(CXX) $(CXXFLAGS) -o vector_demo main_vector.o Vector_3d.o
-
-main_rational.o: main_rational.cpp Rational.h
-	$(CXX) $(CXXFLAGS) -c main_rational.cpp
-
-Rational.o: Rational.cpp Rational.h
-	$(CXX) $(CXXFLAGS) -c Rational.cpp
-
-main_array.o: main_array.cpp Array.h
-	$(CXX) $(CXXFLAGS) -c main_array.cpp
-
-Array.o: Array.cpp Array.h
-	$(CXX) $(CXXFLAGS) -c Array.cpp
-
-main_vector.o: main_vector.cpp Vector_3d.h
-	$(CXX) $(CXXFLAGS) -c main_vector.cpp
-
-Vector_3d.o: Vector_3d.cpp Vector_3d.h
-	$(CXX) $(CXXFLAGS) -c Vector_3d.cpp
-
-clean:
-	rm -f *.o rational_demo array_demo vector_demo
-```
-
-Usage:
-```bash
-make
-make clean
-```
-
----
-
-## Expected Output Examples
-
-### Rational Demo Output
-```
-=== Rational Number Class Demo ===
-
-1. Constructors:
-r1 = 0 (default)
-r2 = 3/4
-r3 = 3/4 (normalized from 6/8)
-r4 = 5
-
-2. Arithmetic:
-1/2 + 1/3 = 5/6
-1/2 - 1/3 = 1/6
-1/2 * 1/3 = 1/6
-1/2 / 1/3 = 3/2
--(1/2) = -1/2
-
-3. Comparisons:
-1/2 == 1/3 : 0
-1/2 != 1/3 : 1
-1/2 < 1/3 : 0
-1/2 > 1/3 : 1
-
-4. Mixed with integers:
-1/2 + 2 = 5/2
-2 + 1/2 = 5/2
-1/2 * 3 = 3/2
-3 * 1/2 = 3/2
-
-5. Exception handling:
-Caught: Denominator must be non-zero
-Caught: Division by zero
-```
-
-### Array Demo Output
-```
-=== Array Class Demo ===
-
-1. Creating array of size 10:
-Capacity: 10
-
-2. Setting values:
-3. Reading values:
-data[0] = 0
-data[1] = 1
-data[2] = 4
-data[3] = 9
-data[4] = 16
-data[5] = 25
-data[6] = 36
-data[7] = 49
-data[8] = 64
-data[9] = 81
-
-4. Copy constructor:
-copy capacity: 10
-copy[0] = 0
-
-5. Assignment operator:
-another capacity: 10
-another[0] = 0
-
-6. Bounds checking:
-data.at(5) = 25
-Trying data.at(100)...
-Caught: Index 100 out of range [0, 9]
-```
-
----
-
-## Testing Checklist
-
-- [ ] Constructors work correctly
-- [ ] Destructors free memory (check with valgrind)
-- [ ] Copy constructor performs deep copy
-- [ ] Assignment operator works correctly
-- [ ] Operators behave as expected
-- [ ] Exception handling works
-- [ ] Const correctness maintained
-- [ ] No memory leaks (valgrind --leak-check=full)
-
----
-
-## Common Errors and Fixes
-
-| Error | Cause | Fix |
-|-------|-------|-----|
-| Segmentation fault | Using deleted pointer | Set to nullptr after delete |
-| Double free | Deleting same memory twice | Implement proper copy/assignment |
-| Memory leak | Forgot to delete | Add delete in destructor |
-| Undefined reference | Missing function definition | Implement all declared functions |
-| Cannot access private member | Trying to access private from outside | Use public member functions |
+| Algorithm | Time Complexity | Notes |
+|-----------|----------------|-------|
+| Factorial | O(n) | Linear recursive calls |
+| Binomial | O(2^n) | Exponential - very slow |
+| Fibonacci (Recursive) | O(2^n) | Extremely inefficient |
+| Fibonacci (Iterative) | O(n) | Much better! |
+| Power (Basic) | O(n) | Linear recursive calls |
+| Power (Optimized) | O(log n) | Divide and conquer |
+| Selection Sort | O(n²) | Quadratic |
+| Insertion Sort | O(n²) | Quadratic |
+| Merge Sort | O(n log n) | Optimal for comparison-based sorting |
+| Binary Search | O(log n) | Very efficient |
+| Subset Generation | O(2^n) | Must generate all 2^n subsets |
 
 ---
 
 ## Additional Resources
 
-- [cplusplus.com](http://www.cplusplus.com/) - C++ reference
-- [cppreference.com](https://en.cppreference.com/) - Comprehensive C++ reference
-- Valgrind for memory leak detection: `valgrind --leak-check=full ./program`
-- GDB for debugging: `gdb ./program`
+- **University of Waterloo ECE 150** Course Materials
+- **CLRS Introduction to Algorithms** - For deeper algorithm analysis
+- **The Recursive Book of Recursion** by Al Sweigart - Fun introduction
 
 ---
 
-**End of Code Examples** 🎉
-```
+**Created for ECE 150 - Fundamentals of Programming**  
+**University of Waterloo**
 
 ---
-
-**This is the complete Markdown file with all the code!** You can save this as `cpp_classes_complete_code.md` and use it as a reference. 📝
